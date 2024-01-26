@@ -391,16 +391,20 @@ void updateParams(H5::Group& particleGroup, double momentum, double thetaP, doub
     for (size_t i = 0; i < num_elements; ++i) {
 
 
-  	double thetaCer, phiCer, sigma2;
-  	double thetaCerAlt, phiCerAlt, sigma2Alt;
+  			double thetaCer, phiCer, sigma2;
+  			double thetaCerAlt, phiCerAlt, sigma2Alt;
 
         phi_cer_values[i] = -13.;
         theta_cer_values[i] = -13.;        
         sigma_ring_values[i] = -13.;
 
          // bool findPhotCkov(double cluX, double cluY, double& thetaCer, double& phiCer)
+				std::cout << "\n\n ==========================================================" << std::endl;
 
+				bool find2 = false; 
         if (reconObj.findPhotCkov(x_values[i], y_values[i], thetaCer, phiCer)) {
+        
+        	find2 = true; 
           double sigma2 = alisSigma2.sigma2(thetaP, phiP, thetaCer, phiCer);
                             
           phi_cer_values[i] = phiCer;
@@ -408,21 +412,29 @@ void updateParams(H5::Group& particleGroup, double momentum, double thetaP, doub
           sigma_ring_values[i] = sigma2;
           std::cout << "Values: phiCer " << phiCer << " thetaCer " << thetaCer << " sigma2 " << sigma2 << std::endl;
         } 
+        thetaCerAlt = 0;
+        phiCerAlt = 0;
         
-        if (reconObj2.findPhotCkov(x_values[i], y_values[i], thetaCerAlt, phiCerAlt)) {
-          double sigma2 = alisSigmaAlt.sigma2(thetaP, phiP, thetaCer, phiCer);
-                            
-
-          std::cout << "Values: phiCer2 " << phiCerAlt << " thetaCer2 " << thetaCer << " sigma2 " << sigma2 << std::endl;
-        }  
-        
-        else {
-					reconObj2.findPhotCkov(x_values[i], y_values[i], thetaCerAlt, phiCerAlt);        
-          std::cout << "Values not found." << std::endl;
-          
-					std::cout << "Values: phiCer2 " << phiCerAlt << " thetaCer2 " << thetaCer << " sigma2 " << sigma2 << std::endl;          
-          
-        }
+        if (find2) {
+		      if (reconObj2.findPhotCkov(x_values[i], y_values[i], thetaCerAlt, phiCerAlt) and find2) {
+		        double sigma2 = alisSigmaAlt.sigma2(thetaP, phiP, thetaCerAlt, phiCerAlt);
+		                          
+		        std::cout << "Values found." << std::endl;
+		        std::cout << "Values: phiCer2 " << phiCerAlt << " thetaCer2 " << thetaCerAlt << " sigma2 " << sigma2 << std::endl;
+		      }  
+		      
+		      else {
+		      	thetaCerAlt = 0;
+		      	phiCerAlt = 0;
+						reconObj2.findPhotCkov(x_values[i], y_values[i], thetaCerAlt, phiCerAlt);  
+						double sigma2 = alisSigmaAlt.sigma2(thetaP, phiP, thetaCerAlt, phiCerAlt);
+							    
+		        std::cout << "Values not found." << std::endl;
+		        
+						std::cout << "Values: phiCer2 " << phiCerAlt << " thetaCer2 " << thetaCerAlt << " sigma2 " << sigma2 << std::endl;          
+		        
+		      }
+				}		      
     }
 		      
 

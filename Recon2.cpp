@@ -302,11 +302,10 @@ public:
 
         if (iIterCnt >= 50) {
 
-
-
-        return kFALSE;
-
-
+					std::cout << " exit with thetaCer = " << thetaCer <<std::endl;					
+					
+					
+        	return kFALSE;
 
         }
 
@@ -317,21 +316,14 @@ public:
 
 
 
-
-
-
         dirCkov.SetCoordinates(1, ckov, phi);
 
 
-
         XYVector posC = traceForward(dirCkov); // trace photon with actual angles
-
+        
 
 
         double dist = cluR - (posC - fTrkPos).Mag2();                  // get distance between trial point and cluster position
-
-
-
 
 
 
@@ -340,7 +332,7 @@ public:
 
 
 
-        dist = -999; // total reflection problem
+        	dist = -999; // total reflection problem
 
 
 
@@ -356,7 +348,7 @@ public:
 
 
 
-        ckov1 = ckov; // cluster @ larger ckov
+        	ckov1 = ckov; // cluster @ larger ckov
 
 
 
@@ -364,7 +356,7 @@ public:
 
 
 
-        ckov2 = ckov; // cluster @ smaller ckov
+        	ckov2 = ckov; // cluster @ smaller ckov
 
 
 
@@ -376,19 +368,27 @@ public:
 
 
 
-        dirCkov.SetCoordinates(1, ckov, phi); 
+        	dirCkov.SetCoordinates(1, ckov, phi); 
 
 
 
-        lors2Trs(dirCkov, thetaCer, phiCer);  // find ckov (in TRS:the effective Cherenkov angle!)
+        	lors2Trs(dirCkov, thetaCer, phiCer);  // find ckov (in TRS:the effective Cherenkov angle!)
+			
 
 
-
-        return kTRUE;
+        	return kTRUE;
 
 
 
         }
+        
+        std::cout << " cluX  " << cluX << " posC.X "<< posC.X() << " cluY  " << cluY << " posC.Y "<< posC.Y() << std::endl;
+
+
+				std::cout << "ckovTh " << ckov << "  phi  "<< phi << "  dist "<< dist << std::endl;
+				
+std::cout << "thetaCer " << thetaCer << "  phiCer  "<< phiCer << std::endl;
+				//std::cout << "ckovTh , phi" << ckovTh << " "<< phi << "  dist s "<< dist << std::endl;
 
 
 
