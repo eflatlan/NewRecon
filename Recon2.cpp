@@ -248,11 +248,8 @@ public:
 
 
 
-    XYZVector pc(cluX, cluY, 0.5 * winThick() + gapIdx()); // mip at PC
-
-
-
-
+    XYZVector pc(cluX, cluY, 0.5 * winThick() + gapThick()); // mip at PC
+		//gapThick was 
 
 
 
@@ -265,13 +262,7 @@ public:
 
 
 
-
-
-
     double phi = (pc - rad).Phi(); // phi of photon
-
-
-
 
 
 
@@ -317,11 +308,22 @@ public:
 
 
         dirCkov.SetCoordinates(1, ckov, phi);
+        /*Printf("dirCkov | ckov : %.2f, phi : %.2f  ", dirCkov.Theta(), dirCkov.Phi());
+        
+        dirCkov.SetTheta(ckov);
+        
+        dirCkov.SetPhi(phi);     
+        Printf("dirCkov | ckov : %.2f, phi : %.2f  ", dirCkov.Theta(), dirCkov.Phi());*/
+
+        
+
+        
+        
+    		// dirCkov.SetMagThetaPhi(1, ckov, phi);
 
 
         XYVector posC = traceForward(dirCkov); // trace photon with actual angles
         
-
 
         double dist = cluR - (posC - fTrkPos).Mag2();                  // get distance between trial point and cluster position
 
@@ -365,11 +367,8 @@ public:
 
 
 
-
-
-
         	dirCkov.SetCoordinates(1, ckov, phi); 
-
+    			//dirCkov.SetMagThetaPhi(1, ckov, phi);
 
 
         	lors2Trs(dirCkov, thetaCer, phiCer);  // find ckov (in TRS:the effective Cherenkov angle!)
@@ -381,7 +380,7 @@ public:
 
 
         }
-        
+        std::cout << " Recon2 " << iIterCnt << std::endl;
         std::cout << " cluX  " << cluX << " posC.X "<< posC.X() << " cluY  " << cluY << " posC.Y "<< posC.Y() << std::endl;
 
 
@@ -449,8 +448,8 @@ std::cout << "thetaCer " << thetaCer << "  phiCer  "<< phiCer << std::endl;
 
 
     if (thetaCer > TMath::ASin(1. / getRefIdx())) {
-
-
+				Printf("thetaCer %.2f > TMath::ASin(1. / getRefIdx(): %.2f  ", thetaCer, TMath::ASin(1. / getRefIdx()));
+				
 
         return pos;                                                       // total refraction on WIN-GAP boundary
 
@@ -482,28 +481,31 @@ std::cout << "thetaCer " << thetaCer << "  phiCer  "<< phiCer << std::endl;
 
     propagate(dirCkov, posCkov, -0.5 * winThick());                     // go to RAD-WIN boundary
 
+		Printf("   propagate2  | dirCkov | ckov : %.2f, phi : %.2f  ", dirCkov.Theta(), dirCkov.Phi());
 
+		Printf("   propagate2  | posCkov | x : %.2f, y : %.2f  , z : %.2f ", posCkov.X(), posCkov.Y(), posCkov.Z());
 
     refract(dirCkov, getRefIdx(), winIdx());                    // RAD-WIN refraction
-
+    
+		Printf("   refract2  | dirCkov | ckov : %.2f, phi : %.2f  ", dirCkov.Theta(), dirCkov.Phi());
 
 
     propagate(dirCkov, posCkov, 0.5 * winThick());                      // go to WIN-GAP boundary
 
-
-
+Printf("   propagate2  | dirCkov | ckov : %.2f, phi : %.2f  ", dirCkov.Theta(), dirCkov.Phi());
+Printf("   propagate2  | posCkov | x : %.2f, y : %.2f  , z : %.2f ", posCkov.X(), posCkov.Y(), posCkov.Z());
     refract(dirCkov, winIdx(), gapIdx());                       // WIN-GAP refraction
 
-
+Printf("   refract2  | dirCkov | ckov : %.2f, phi : %.2f  ", dirCkov.Theta(), dirCkov.Phi());
 
     propagate(dirCkov, posCkov, 0.5 * winThick() + gapThick()); // go to PC
 
 
 
+
+Printf("   propagate2  | dirCkov | ckov : %.2f, phi : %.2f  ", dirCkov.Theta(), dirCkov.Phi());
+Printf("   propagate2  | posCkov | x : %.2f, y : %.2f  , z : %.2f ", posCkov.X(), posCkov.Y(), posCkov.Z());
     pos.SetXY(posCkov.X(), posCkov.Y());
-
-
-
     return pos;
 
 
@@ -686,47 +688,46 @@ std::cout << "thetaCer " << thetaCer << "  phiCer  "<< phiCer << std::endl;
 
 
 
-    // Finds an intersection point between a line and XY plane shifted along Z.
+    	// Finds an intersection point between a line and XY plane shifted along Z.
+
+
+	
+   	 // Arguments:  dir, pos   - vector along the line and any point of the line
 
 
 
-    // Arguments:  dir,pos   - vector along the line and any point of the line
+    	//             z         - z coordinate of plane
 
 
 
-    //             z         - z coordinate of plain
+    	//   Returns:  none
 
 
 
-    //   Returns:  none
+    	//   On exit:  pos is the position if this intesection if any
+
+
+			//const Polar3DVector& dir, XYZVector& pos, double z
+			
+    	XYZVector nrm(0, 0, 1);
 
 
 
-    //   On exit:  pos is the position if this intesection if any
+    	XYZVector pnt(0, 0, z);
 
 
 
-    XYZVector nrm(0, 0, 1);
+    	XYZVector diff = pnt - pos;
+
+
+    	
+    	double sint = diff.Dot(nrm) / dir.Dot(nrm);
+
+    	//double sint = (nrm * diff) / (nrm * dir);
 
 
 
-    XYZVector pnt(0, 0, z);
-
-
-
-
-
-
-
-    XYZVector diff = pnt - pos;
-
-
-
-    double sint = 0; //(nrm * diff) / (nrm * dir);
-
-
-
-    pos += sint * dir;
+    	pos += sint * dir;
 
 
 
@@ -743,8 +744,6 @@ std::cout << "thetaCer " << thetaCer << "  phiCer  "<< phiCer << std::endl;
 
 
     void refract(Polar3DVector& dir, double n1, double n2) const
-
-
 
     {
 

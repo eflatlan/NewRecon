@@ -31,30 +31,105 @@ class Recon
       double ckov2 = 0.75 + fTrkDir.Theta(); // start to find theta cerenkov in DRS
       const double kTol = 0.01;
       Int_t iIterCnt = 0;
-      while (1) {
+      
+
+    	while (1) {
+
+
+
         if (iIterCnt >= 50) {
-          return kFALSE;
+
+					std::cout << " exit with thetaCer = " << thetaCer <<std::endl;					
+					
+					
+        	return kFALSE;
+
         }
+
+
+
         double ckov = 0.5 * (ckov1 + ckov2);
+
+
+
+
         dirCkov.SetMagThetaPhi(1, ckov, phi);
-        TVector2 posC = traceForward(dirCkov);   // trace photon with actual angles
-        double dist = cluR - (posC - fPc).Mod(); // get distance between trial point and cluster position
+
+
+        auto posC = traceForward(dirCkov); // trace photon with actual angles
+        
+
+
+        double dist = cluR - (posC - fTrkPos).Mod();                  // get distance between trial point and cluster position
+
+
+
+
         if (posC.X() == -999) {
-          dist = -999;
-        }           // total reflection problem
-        iIterCnt++; // counter step
-        if (dist > kTol) {
-          ckov1 = ckov;
-        } // cluster @ larger ckov
-        else if (dist < -kTol) {
-          ckov2 = ckov;
-        }                                       // cluster @ smaller ckov
-        else {                                  // precision achived: ckov in DRS found
-          dirCkov.SetMagThetaPhi(1, ckov, phi); //
-          lors2Trs(dirCkov, thetaCer, phiCer);  // find ckov (in TRS:the effective Cherenkov angle!)
-          return kTRUE;
+
+
+
+        	dist = -999; // total reflection problem
+
+
+
         }
-      }
+
+
+
+        iIterCnt++;    // counter step
+
+
+
+        if (dist > kTol) {
+
+
+
+        	ckov1 = ckov; // cluster @ larger ckov
+
+
+
+        } else if (dist < -kTol) {
+
+
+
+        	ckov2 = ckov; // cluster @ smaller ckov
+
+
+
+        } else {          // precision achived: ckov in DRS found
+
+
+
+
+
+
+
+        	dirCkov.SetMagThetaPhi(1, ckov, phi); 
+
+
+
+        	lors2Trs(dirCkov, thetaCer, phiCer);  // find ckov (in TRS:the effective Cherenkov angle!)
+			
+
+
+        	return kTRUE;
+
+
+
+        }
+        std::cout << " Recon " << iIterCnt << std::endl;
+        std::cout << " cluX  " << cluX << " posC.X "<< posC.X() << " cluY  " << cluY << " posC.Y "<< posC.Y() << std::endl;
+
+
+				std::cout << "ckovTh " << ckov << "  phi  "<< phi << "  dist "<< dist << std::endl;
+				
+std::cout << "thetaCer " << thetaCer << "  phiCer  "<< phiCer << std::endl;
+				//std::cout << "ckovTh , phi" << ckovTh << " "<< phi << "  dist s "<< dist << std::endl;
+
+
+
+    }
     } // FindPhotTheta()
     std::vector<SimpleCluster> clusters = {};
     
@@ -155,11 +230,35 @@ class Recon
       }                                                                           // total refraction on WIN-GAP boundary
       double zRad = -0.5 * radThick() - 0.5 * winThick();         // z position of middle of RAD
       TVector3 posCkov(fTrkPos.X(), fTrkPos.Y(), zRad);                           // RAD: photon position is track position @ middle of RAD
-      propagate(dirCkov, posCkov, -0.5 * winThick());                     // go to RAD-WIN boundary
-      refract(dirCkov, getRefIdx(), winIdx());                    // RAD-WIN refraction
-      propagate(dirCkov, posCkov, 0.5 * winThick());                      // go to WIN-GAP boundary
-      refract(dirCkov, winIdx(), gapIdx());                       // WIN-GAP refraction
-      propagate(dirCkov, posCkov, 0.5 * winThick() + gapThick()); // go to PC
+
+
+    propagate(dirCkov, posCkov, -0.5 * winThick());                     // go to RAD-WIN boundary
+
+		Printf("   propagate | dirCkov | ckov : %.2f, phi : %.2f  ", dirCkov.Theta(), dirCkov.Phi());
+
+		Printf("   propagate | posCkov | x : %.2f, y : %.2f  , z : %.2f ", posCkov.X(), posCkov.Y(), posCkov.Z());
+
+    refract(dirCkov, getRefIdx(), winIdx());                    // RAD-WIN refraction
+    
+		Printf("   refract | dirCkov | ckov : %.2f, phi : %.2f  ", dirCkov.Theta(), dirCkov.Phi());
+
+
+    propagate(dirCkov, posCkov, 0.5 * winThick());                      // go to WIN-GAP boundary
+
+Printf("   propagate | dirCkov | ckov : %.2f, phi : %.2f  ", dirCkov.Theta(), dirCkov.Phi());
+Printf("   propagate | posCkov | x : %.2f, y : %.2f  , z : %.2f ", posCkov.X(), posCkov.Y(), posCkov.Z());
+    refract(dirCkov, winIdx(), gapIdx());                       // WIN-GAP refraction
+
+Printf("   refract | dirCkov | ckov : %.2f, phi : %.2f  ", dirCkov.Theta(), dirCkov.Phi());
+
+    propagate(dirCkov, posCkov, 0.5 * winThick() + gapThick()); // go to PC
+
+
+
+
+Printf("   propagate | dirCkov | ckov : %.2f, phi : %.2f  ", dirCkov.Theta(), dirCkov.Phi());
+Printf("   propagate | posCkov | x : %.2f, y : %.2f  , z : %.2f ", posCkov.X(), posCkov.Y(), posCkov.Z());
+
       pos.Set(posCkov.X(), posCkov.Y());
       return pos;
 
